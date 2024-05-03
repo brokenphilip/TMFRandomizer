@@ -2,7 +2,8 @@
 
 Aseco::addChatCommand('addrand', 'Adds random track from TMX');
 
-Aseco::registerEvent('onNewChallenge2', 'addrand_HandleAuto');
+Aseco::registerEvent('onNewChallenge2', 'addrand_OnNewChallenge');
+Aseco::registerEvent('onStatusChangeTo4', 'addrand_OnPlay');
 /*
 class Exchange {
 	private $game;
@@ -26,11 +27,20 @@ class Exchange {
 }
 */
 
+$new_challenge = false;
 $addrand_auto = false;
 
-function addrand_HandleAuto($aseco) {
-	global $addrand_auto;
+function addrand_OnNewChallenge($aseco) {
+	global $addrand_auto, $new_challenge;
 	if ($addrand_auto) {
+		$new_challenge = true;
+	}
+}
+
+function addrand_OnPlay($aseco) {
+	global $addrand_auto, $new_challenge;
+	if ($addrand_auto && $new_challenge) {
+		$new_challenge = false;
 		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Automatically rolling random track...'));
 		add_rand($aseco);
 	}
