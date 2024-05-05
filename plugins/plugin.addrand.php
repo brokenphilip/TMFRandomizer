@@ -129,7 +129,7 @@ function add_track($aseco, $tmx_id, $url)
 	getAllChallenges($list, '*', '*');
 	// check for track presence on server
 	foreach ($list->tracklist as $key) {
-		if ($key['uid'] == $newtrk['uid']) {
+		if ($key['uid'] == $new_track['uid']) {
 			unlink($local_file_name);
 			unset($list);
 			
@@ -142,10 +142,10 @@ function add_track($aseco, $tmx_id, $url)
 	unset($list);
 	// rename ID filename to track's name
 	$md5new = md5_file($local_file_name);
-	$filename = trim(utf8_decode(stripColors($newtrk['name'])));
+	$filename = trim(utf8_decode(stripColors($new_track['name'])));
 	$filename = preg_replace('/[^A-Za-z0-9 \'#=+~_,.-]/', '_', $filename);
 	$filename = preg_replace('/ +/', ' ', preg_replace('/_+/', '_', $filename));
-	$partial_directory = $tmxdir . $sepchar . $filename . '_' . $trkid . '.Challenge.gbx';
+	$partial_directory = $tmxdir . $separator . $filename . '_' . $tmx_id_trim . '.Challenge.gbx';
 	// insure unique filename by incrementing sequence number,
 	// if not a duplicate track
 	$i = 1;
@@ -157,7 +157,7 @@ function add_track($aseco, $tmx_id, $url)
 			$partial_directory = str_replace($aseco->server->trackdir, '', $nocasepath);
 			break;
 		} else {
-			$partial_directory = $tmxdir . $sepchar . $filename . '_' . $trkid . '-' . $i++ . '.Challenge.gbx';
+			$partial_directory = $tmxdir . $separator . $filename . '_' . $tmx_id_trim . '-' . $i++ . '.Challenge.gbx';
 		}
 	}
 	if ($dupl) {
@@ -371,9 +371,11 @@ function add_rand($aseco) {
 			}
 			
 			// weak match for unlimite(r/d), infinit(e/y)
+			// NOTE: some tracks use terms like 1.2 and 1.3 to refer to the unlimiter version, but we're doing more harm than good by filtering them out
 			$name = strtolower($json->Results[0]->TrackName);
 			$desc = strtolower($json->Results[0]->AuthorComments);
-			if (strpos($name, 'unlimite') !== false || strpos($desc, 'unlimite') !== false || strpos($name, 'infinit') !== false || strpos($desc, 'infinit') !== false) {
+			if (strpos($name, 'unlimite') !== false || strpos($desc, 'unlimite') !== false ||
+				strpos($name, 'infinit') !== false || strpos($desc, 'infinit') !== false) {
 				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Track is likely TMUnlimiter/Infinity, skipping...'));
 				continue;
 			}
