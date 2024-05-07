@@ -50,7 +50,7 @@ function chat_addrand($aseco, $command) {
 	$client = $command['author'];
 	
 	if (!$aseco->isMasterAdminL($client->login)) {
-		$aseco->client->query('ChatSendServerMessageToLogin', $aseco->formatColors('{#server}> {#error}Only the MasterAdmin can run this command.'), $client->login);
+		$aseco->client->query('ChatSendServerMessageToLogin', $aseco->formatColors('{#server}> {#error}Only the MasterAdmin can run this command!'), $client->login);
 		return;
 	}
 	
@@ -94,8 +94,9 @@ function add_track($aseco, $tmx_id, $url)
 		return false;
 	}
 	
-	if (strlen($file) >= 256 * 1024) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}File size is too large!'));
+	$file_size = strlen($file);
+	if ($file_size >= 256 * 1024) {
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}File size is too large: {#highlite}'. round($file_size/1024, 2) . 'KB'));
 		return false;
 	}
 
@@ -104,16 +105,16 @@ function add_track($aseco, $tmx_id, $url)
 	$local_file_name = $aseco->server->trackdir . $partial_directory;
 	if ($nocasepath = file_exists_nocase($local_file_name)) {
 		if (!unlink($nocasepath)) {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to erase old file'));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to erase old file: {#highlite}' . $local_file_name));
 			return false;
 		}
 	}
 	if (!$local_file = @fopen($local_file_name, 'wb')) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to create file!'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to create file: {#highlite}' . $local_file_name));
 		return false;
 	}
 	if (!fwrite($local_file, $file)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to save/write file!'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to save/write file: {#highlite}' . $local_file_name));
 		return false;
 	}
 	fclose($local_file);
@@ -168,12 +169,12 @@ function add_track($aseco, $tmx_id, $url)
 	}
 
 	if ($aseco->server->getGame() == 'TMF' && !$aseco->client->query('CheckChallengeForCurrentServerParams', $partial_directory)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}CheckChallenge failed - '.$aseco->client->getErrorMessage()));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}CheckChallenge failed: {#highlite}'.$aseco->client->getErrorMessage()));
 		return false;
 	}
 	
 	if (!$aseco->client->query('AddChallenge', $partial_directory)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}AddChallenge failed - '.$aseco->client->getErrorMessage()));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}AddChallenge failed: {#highlite}'.$aseco->client->getErrorMessage()));
 		return false;
 	}
 	
@@ -181,7 +182,7 @@ function add_track($aseco, $tmx_id, $url)
 	$aseco->client->query('GetChallengeInfo', $partial_directory);
 	$track = $aseco->client->getResponse();
 	if ($aseco->client->isError()) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}GetChallengeInfo failed - '.$aseco->client->getErrorMessage()));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}GetChallengeInfo failed: {#highlite}'.$aseco->client->getErrorMessage()));
 		return false;
 	}
 
