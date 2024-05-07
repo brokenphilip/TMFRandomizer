@@ -73,7 +73,15 @@ function chat_addrand($aseco, $command) {
 function add_track($aseco, $tmx_id, $url)
 {
 	global $rasp, $jukebox, $jukebox_adminadd;  // from plugin.rasp.php, rasp.settings.php
-	$tmxdir = 'Challenges/RandomizerTMX';
+	$tmxdir = 'Challenges\\Randomizer';
+	
+	$directory = $aseco->server->trackdir . $tmxdir;
+	if (!file_exists($directory)) {
+		if (!mkdir($directory)) {
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to create directory: {#highlite}' . $directory));
+			return false;
+		}
+	}
 	
 	$full_url = ($url).'get.aspx?action=trackgbx&id=';
 
