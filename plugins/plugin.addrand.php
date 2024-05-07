@@ -73,7 +73,7 @@ function chat_addrand($aseco, $command) {
 function add_track($aseco, $tmx_id, $url)
 {
 	global $rasp, $jukebox, $jukebox_adminadd;  // from plugin.rasp.php, rasp.settings.php
-	$tmxdir = 'Challenges/RandomizerTMX'
+	$tmxdir = 'Challenges/RandomizerTMX';
 	
 	$full_url = ($url).'get.aspx?action=trackgbx&id=';
 
