@@ -39,9 +39,12 @@ function addrand_OnNewChallenge($aseco) {
 
 function addrand_OnPlay($aseco) {
 	global $addrand_auto, $new_challenge;
+	
+	// TODO: /remove last track
+	
 	if ($addrand_auto && $new_challenge) {
 		$new_challenge = false;
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Automatically rolling random track...'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Automatically rolling random track...'));
 		add_rand($aseco);
 	}
 }
@@ -57,11 +60,11 @@ function chat_addrand($aseco, $command) {
 	if ($command['params'] == 'auto') {
 		global $addrand_auto;
 		if ($addrand_auto) {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Random track auto mode: {#highlite}OFF'));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Random track auto mode: {#highlite}OFF'));
 			$addrand_auto = false;
 		}
 		else {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Random track auto mode: {#highlite}ON'));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Random track auto mode: {#highlite}ON'));
 			$addrand_auto = true;
 		}
 		return;
@@ -78,7 +81,7 @@ function add_track($aseco, $tmx_id, $url)
 	$directory = $aseco->server->trackdir . $tmxdir;
 	if (!file_exists($directory)) {
 		if (!mkdir($directory)) {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to create directory: {#highlite}' . $directory));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Failed to create directory: {#highlite}' . $directory));
 			return false;
 		}
 	}
@@ -86,25 +89,25 @@ function add_track($aseco, $tmx_id, $url)
 	$full_url = ($url).'get.aspx?action=trackgbx&id=';
 
 	if (!is_numeric($tmx_id)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}TMX ID is not a number!'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}TMX ID is not a number!'));
 		return false;
 	}
 	
 	if ($tmx_id < 0) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}TMX ID is below 0!'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}TMX ID is below 0!'));
 		return false;
 	}
 	
 	$tmx_id_trim = ltrim($tmx_id, '0');
 	$file = http_get_file($full_url . $tmx_id_trim);
 	if ($file === false || file == -1) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Error downloading, or wrong TMX section, or TMX is down!'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Error downloading, or wrong TMX section, or TMX is down!'));
 		return false;
 	}
 	
 	$file_size = strlen($file);
 	if ($file_size >= 256 * 1024) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}File size is too large: {#highlite}'. round($file_size/1024, 2) . 'KB'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}File size is too large: {#highlite}'. round($file_size/1024, 2) . 'KB'));
 		return false;
 	}
 
@@ -113,23 +116,23 @@ function add_track($aseco, $tmx_id, $url)
 	$local_file_name = $aseco->server->trackdir . $partial_directory;
 	if ($nocasepath = file_exists_nocase($local_file_name)) {
 		if (!unlink($nocasepath)) {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to erase old file: {#highlite}' . $local_file_name));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Failed to erase old file: {#highlite}' . $local_file_name));
 			return false;
 		}
 	}
 	if (!$local_file = @fopen($local_file_name, 'wb')) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to create file: {#highlite}' . $local_file_name));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Failed to create file: {#highlite}' . $local_file_name));
 		return false;
 	}
 	if (!fwrite($local_file, $file)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to save/write file: {#highlite}' . $local_file_name));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Failed to save/write file: {#highlite}' . $local_file_name));
 		return false;
 	}
 	fclose($local_file);
 	
 	$new_track = getChallengeData($local_file_name, false);  // 2nd parm is whether or not to get players & votes required
 	if ($new_track['votes'] == 500 && $new_track['name'] == 'Not a GBX file') {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Track does not exist!'));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Track does not exist!'));
 		unlink($local_file_name);
 		return false;
 	}
@@ -143,7 +146,7 @@ function add_track($aseco, $tmx_id, $url)
 			unlink($local_file_name);
 			unset($list);
 			
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Track already in server list!'));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Track already in server list!'));
 			return false;
 		}
 	}
@@ -177,12 +180,12 @@ function add_track($aseco, $tmx_id, $url)
 	}
 
 	if ($aseco->server->getGame() == 'TMF' && !$aseco->client->query('CheckChallengeForCurrentServerParams', $partial_directory)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}CheckChallenge failed: {#highlite}'.$aseco->client->getErrorMessage()));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}CheckChallenge failed: {#highlite}'.$aseco->client->getErrorMessage()));
 		return false;
 	}
 	
 	if (!$aseco->client->query('AddChallenge', $partial_directory)) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}AddChallenge failed: {#highlite}'.$aseco->client->getErrorMessage()));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}AddChallenge failed: {#highlite}'.$aseco->client->getErrorMessage()));
 		return false;
 	}
 	
@@ -190,7 +193,7 @@ function add_track($aseco, $tmx_id, $url)
 	$aseco->client->query('GetChallengeInfo', $partial_directory);
 	$track = $aseco->client->getResponse();
 	if ($aseco->client->isError()) {
-		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}GetChallengeInfo failed: {#highlite}'.$aseco->client->getErrorMessage()));
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}GetChallengeInfo failed: {#highlite}'.$aseco->client->getErrorMessage()));
 		return false;
 	}
 
@@ -221,7 +224,7 @@ function add_track($aseco, $tmx_id, $url)
 	if ($jukebox_adminadd)
 		$aseco->releaseEvent('onJukeboxChanged', array('add', $jukebox[$uid]));
 	
-	$message = formatText('{#server}> {#admin}Added: {#highlite}{1} {#admin}by {#highlite}{2} {#admin}on {#highlite}{3}{#admin}!', $track_name, stripColors($track['Author'], false), $track['Environnement']);
+	$message = formatText('{#server}>> {#admin}Added: {#highlite}{1} {#admin}by {#highlite}{2} {#admin}on {#highlite}{3}{#admin}!', $track_name, stripColors($track['Author'], false), $track['Environnement']);
 	$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
 	return true;
 }
@@ -351,7 +354,7 @@ function add_rand($aseco) {
 		}
 	}
 	
-	$message = formatText('{#server}> {#admin}Chosen random exchange: {#highlite}{1}', $game);
+	$message = formatText('{#server}>> {#admin}Chosen random exchange: {#highlite}{1}', $game);
 	$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
 	
 	while (true) {
@@ -359,24 +362,24 @@ function add_rand($aseco) {
 		if ($headers !== false && isset($headers['Location'])) {
 			$track = str_replace('/trackshow/', '', $headers['Location']);
 			
-			$message = formatText('{#server}> {#admin}Found random track: {#highlite}{1}', $track);
+			$message = formatText('{#server}>> {#admin}Found random track: {#highlite}{1}', $track);
 			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
 			
 			$content = file_get_contents($url .'api/tracks?fields=PrimaryType,Environment,Car,AuthorTime,TrackName,AuthorComments&id='. ($track));
 			$json = json_decode($content);
 			
 			if ($json->Results[0]->PrimaryType == 1 || $json->Results[0]->PrimaryType == 3) {
-				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Track is puzzle or stunts, skipping...'));
+				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track is puzzle or stunts, skipping...'));
 				continue;
 			}
 			
 			if ($nations && ($json->Results[0]->Environment != 7 || $json->Results[0]->Car != 7)) {
-				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Track is not nations, skipping...'));
+				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track is not nations, skipping...'));
 				continue;
 			}
 			
 			if ($json->Results[0]->AuthorTime > 120000) {
-				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Track is over 2 mins long, skipping...'));
+				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track is over 2 mins long, skipping...'));
 				continue;
 			}
 			
@@ -386,7 +389,7 @@ function add_rand($aseco) {
 			$desc = strtolower($json->Results[0]->AuthorComments);
 			if (strpos($name, 'unlimite') !== false || strpos($desc, 'unlimite') !== false ||
 				strpos($name, 'infinit') !== false || strpos($desc, 'infinit') !== false) {
-				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#admin}Track is likely TMUnlimiter/Infinity, skipping...'));
+				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track is likely TMUnlimiter/Infinity, skipping...'));
 				continue;
 			}
 			
@@ -407,11 +410,13 @@ function add_rand($aseco) {
 			*/
 		}
 		else {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Failed to get header!'));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Failed to get header!'));
 		}
+		
+		// only kicks in if failed to get header, or add_track returned false for whatever reason
 		$failed_attempts++;
 		if ($failed_attempts >= 5) {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}> {#error}Too many failed attempts, bailing!'));
+			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Too many failed attempts, bailing!'));
 			break;
 		}
 	}
