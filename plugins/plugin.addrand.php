@@ -52,23 +52,66 @@ function addrand_OnPlay($aseco) {
 function chat_addrand($aseco, $command) {
 	$client = $command['author'];
 	
-	if (!$aseco->isMasterAdminL($client->login)) {
-		$aseco->client->query('ChatSendServerMessageToLogin', $aseco->formatColors('{#server}> {#error}Only the MasterAdmin can run this command!'), $client->login);
-		return;
+	$logtitle = 'Player';
+	$chattitle = 'Player';
+	$can_addrand = false;
+	$can_addrand_auto = false;
+	
+	if ($aseco->isMasterAdmin($client)) {
+		$logtitle = 'MasterAdmin';
+		$chattitle = $aseco->titles['MASTERADMIN'][0];
+		$can_addrand = true;
+		$can_addrand_auto = true;
+	} 
+	
+	else if ($aseco->isAdmin($client) && $aseco->allowAdminAbility($command['params'][0])) {
+		$logtitle = 'Admin';
+		$chattitle = $aseco->titles['ADMIN'][0];
+		$can_addrand = true;
+		$can_addrand_auto = true;
+	}
+	
+	else if ($aseco->isOperator($client) && $aseco->allowOpAbility($command['params'][0])) {
+		$logtitle = 'Operator';
+		$chattitle = $aseco->titles['OPERATOR'][0];
+		$can_addrand = true;
 	}
 	
 	if ($command['params'] == 'auto') {
+		if (!$can_addrand_auto) {
+			$aseco->client->query('ChatSendServerMessageToLogin', $aseco->formatColors('{#server}> {#error}This command is for Admins only!'), $client->login);
+			return;
+		}
+		
 		global $addrand_auto;
 		if ($addrand_auto) {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Random track auto mode: {#highlite}OFF'));
+			$rtam = 'OFF';
 			$addrand_auto = false;
 		}
 		else {
-			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Random track auto mode: {#highlite}ON'));
+			$rtam = 'ON';
 			$addrand_auto = true;
 		}
+		
+		$aseco->console('{1} [{2}] sets random track auto mode to {3}', $logtitle, $client->login, $rtam);
+		
+		$message = formatText('{#server}>> {#admin}{1}$z$s {#highlite}{2}$z$s{#admin} sets random track auto mode to {#highlite}{3}',
+								$chattitle, $client->nickname, $rtam);
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
+
 		return;
 	}
+	
+	if (!$can_addrand) {
+		$aseco->client->query('ChatSendServerMessageToLogin', $aseco->formatColors('{#server}> {#error}This command is for Operators only!'), $client->login);
+		return;
+	}
+	
+	$aseco->console('{1} [{2}] adds random track', $logtitle, $client->login);
+	
+	$message = formatText('{#server}>> {#admin}{1}$z$s {#highlite}{2}$z$s{#admin} adds random track!',
+							$chattitle, $client->nickname);
+	$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
 	
 	add_rand($aseco);
 }
@@ -99,7 +142,9 @@ function add_track($aseco, $tmx_id, $url)
 	}
 	
 	$tmx_id_trim = ltrim($tmx_id, '0');
+
 	$file = http_get_file($full_url . $tmx_id_trim);
+	
 	if ($file === false || file == -1) {
 		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Error downloading, or wrong TMX section, or TMX is down!'));
 		return false;
@@ -323,41 +368,45 @@ function add_rand($aseco) {
 	
 	$nations = $aseco->server->packmask == 'Stadium';
 	
-	if ($nations) {
-		$rand = rand(1, 100);
-		if ($rand <= 75) {
-			$game = "TMNF";
-			$url = "https://tmnf.exchange/";
-		}
-		else if ($rand <= 95) {
-			$game = "TMN";
-			$url = "https://nations.tm-exchange.com/";
-		}
-	}
-	else {
-		$rand = rand(1, 100);
-		if ($rand <= 2) {
-			$game = "TMN";
-			$url = "https://nations.tm-exchange.com/";
-		}
-		else if ($rand <= 13) {
-			$game = "TMNF";
-			$url = "https://tmnf.exchange/";
-		}
-		else if ($rand <= 24) {
-			$game = "TMO";
-			$url = "https://original.tm-exchange.com/";
-		}
-		else if ($rand <= 35) {
-			$game = "TMS";
-			$url = "https://sunrise.tm-exchange.com/";
-		}
-	}
-	
-	$message = formatText('{#server}>> {#admin}Chosen random exchange: {#highlite}{1}', $game);
-	$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
+	$aseco->client->query('ManualFlowControlEnable', true);
 	
 	while (true) {
+		$rand = rand(1, 100);
+		
+		if ($nations) {
+			if ($rand <= 75) {
+				$game = "TMNF";
+				$url = "https://tmnf.exchange/";
+			}
+			else if ($rand <= 95) {
+				$game = "TMN";
+				$url = "https://nations.tm-exchange.com/";
+			}
+			/* 96 - 100 TMU */
+		}
+		else {
+			if ($rand <= 2) {
+				$game = "TMN";
+				$url = "https://nations.tm-exchange.com/";
+			}
+			else if ($rand <= 13) {
+				$game = "TMNF";
+				$url = "https://tmnf.exchange/";
+			}
+			else if ($rand <= 24) {
+				$game = "TMO";
+				$url = "https://original.tm-exchange.com/";
+			}
+			else if ($rand <= 35) {
+				$game = "TMS";
+				$url = "https://sunrise.tm-exchange.com/";
+			}
+			/* 36 - 100 TMU */
+		}
+		
+		$message = formatText('{#server}>> {#admin}Chosen random exchange: {#highlite}{1}', $game);
+		$aseco->client->query('ChatSendServerMessage', $aseco->formatColors($message));
+		
 		$headers = get_headers($url .'trackrandom', 1);
 		if ($headers !== false && isset($headers['Location'])) {
 			$track = str_replace('/trackshow/', '', $headers['Location']);
@@ -373,9 +422,55 @@ function add_rand($aseco) {
 				continue;
 			}
 			
-			if ($nations && ($json->Results[0]->Environment != 7 || $json->Results[0]->Car != 7)) {
-				$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track is not nations, skipping...'));
-				continue;
+			if ($nations)
+			{
+				if ($json->Results[0]->Environment != 7 || $json->Results[0]->Car != 7) {
+					$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track is not nations, skipping...'));
+					continue;
+				}
+			}
+			else
+			{
+				$aseco->client->resetError();
+				$aseco->client->query('GetCurrentChallengeInfo');
+				$current_track = $aseco->client->getResponse();
+				if ($aseco->client->isError())
+				{
+					$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}GetCurrentChallengeInfo failed: {#highlite}'.$aseco->client->getErrorMessage()));
+					break;
+				}
+				
+				$envi = 7; // stadium
+				if (strcmp($current_track['Environnement'], "Alpine") == 0)
+				{
+					$envi = 1;
+				}
+				else if (strcmp($current_track['Environnement'], "Speed") == 0)
+				{
+					$envi = 2;
+				}
+				else if (strcmp($current_track['Environnement'], "Rally") == 0)
+				{
+					$envi = 3;
+				}
+				else if (strcmp($current_track['Environnement'], "Island") == 0)
+				{
+					$envi = 4;
+				}
+				else if (strcmp($current_track['Environnement'], "Coast") == 0)
+				{
+					$envi = 5;
+				}
+				else if (strcmp($current_track['Environnement'], "Bay") == 0)
+				{
+					$envi = 6;
+				}
+				
+				if ($envi == $json->Results[0]->Environment)
+				{
+					$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#admin}Track environment matches current track, skipping...'));
+					continue;
+				}
 			}
 			
 			if ($json->Results[0]->AuthorTime > 120000) {
@@ -414,12 +509,15 @@ function add_rand($aseco) {
 		}
 		
 		// only kicks in if failed to get header, or add_track returned false for whatever reason
+		// also if getcurrchallinfo fails
 		$failed_attempts++;
 		if ($failed_attempts >= 5) {
 			$aseco->client->query('ChatSendServerMessage', $aseco->formatColors('{#server}>> {#error}Too many failed attempts, bailing!'));
 			break;
 		}
 	}
+	
+	$aseco->client->query('ManualFlowControlEnable', false);
 }
 
 ?>
