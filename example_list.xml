@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-	The following is a list of searches which Randomizer will use to search for tracks.
-	
-	Each <search> contains the following tags:
+	The following is a list of searches which Randomizer will use to search for tracks. Each <search> contains the following tags:
 	
 	1. <exchange> can be tmuf (for United Forever), tmnf (for Nations Forever), tmo (for Original), tms (for Sunrise) and tmn (for Nations ESWC)
-	2. <weight> is a positive number (X > 0) used in modes 1, 2 and 3 which dictates that this search is X times as likely to be picked
+	2. <weight> is a number that affects the likeliness of a search to be picked:
+		- In mode 0, <weight> is the amount of times (in a row) that the search will be picked
+		- In modes 1 to 3, <weight> is the amount of entries (not necessarily, but can be, in a row) the search has in the list
+		- In all modes, searches with a weight of 0 (or below) will be ignored completely
 	3. <params> contains a list of input parameters to be used for the search (ignoring "count"): https://api2.mania.exchange/Method/Index/43
 	
 	The following list of searches dictates:

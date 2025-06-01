@@ -50,8 +50,6 @@
 		1 - Treated as a shuffled playlist, with no repeats - once the list is complete, it gets re-shuffled
 		2 - Same as 1, but the playlist does not get re-shuffled once complete - it maintains its originally shuffled order
 		3 - Completely randomized each time, allowing the possibility to get the same search multiple times as dictated by <max_repeats> below
-		
-		The <search> tag <weight> does not apply to mode 0.
 	-->
 	<mode>0</mode>
 	
