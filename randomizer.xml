@@ -1,4 +1,108 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<randomizer>
+<settings>
+	<!-- config file for plugin.randomizer.php -->
+	
+	<!--
+		Specifies whether users, operators, admins or masteradmins should be blocked from using commands:
+		
+		0 - Allow command use
+		1 - Require payment before use (/addrand only)
+		2 - Block command use
+		
+		For all commands and for all groups, the default is 0.
+	-->
+	<commands>
+		<!--
+			Searches for a random track, either using specific terms or ones listed in the default search list.
+		-->
+		<rand>
+			<block_user>0</block_user>
+			<block_operator>0</block_operator>
+			<block_admin>0</block_admin>
+			<block_masteradmin>0</block_masteradmin>
+		</rand>
+		
+		<!--
+			Adds a random track, either using specific terms or ones listed in the default search list.
+		-->
+		<addrand>
+			<block_user>0</block_user>
+			<block_operator>0</block_operator>
+			<block_admin>0</block_admin>
+			<block_masteradmin>0</block_masteradmin>
+		</addrand>
+		
+		<!--
+			Toggles "automode" to add random tracks automatically after each map. This disables /addrand entirely.
+		-->
+		<addrand_auto>
+			<block_user>0</block_user>
+			<block_operator>0</block_operator>
+			<block_admin>0</block_admin>
+			<block_masteradmin>0</block_masteradmin>
+		</addrand_auto>
+	</commands>
+	
+	<!--
+		Specifies the selection mode for the list of searches:
+		
+		0 (default) - Treated as an ordered playlist, going from top to bottom - once the list is complete, it starts from the beginning again
+		1 - Treated as a shuffled playlist, with no repeats - once the list is complete, it gets re-shuffled
+		2 - Same as 1, but the playlist does not get re-shuffled once complete - it maintains its originally shuffled order
+		3 - Completely randomized each time, allowing the possibility to get the same search multiple times as dictated by <max_repeats> below
+		
+		The <search> tag <weight> does not apply to mode 0.
+	-->
+	<mode>0</mode>
+	
+	<!--
+		Specifically for mode 3, dictates the maximum amount of times a search can be repeated.
+		
+		A positive value (X > 0) means that a search can be repeated up to X times in a row before it is excluded from the next pick.
+		
+		A value of zero (X = 0) means that a search can NOT be repeated, and a different one must be chosen each time.
+		
+		A negative value (X < 0) means that a search has to be skipped an addtional -X times.
+		As an example, for X = -2, there must be at least 3 different searches inbetween two identical search picks.
 
-</randomizer>
+		In case there are not enough searches from the list to satisfy the requirements of <max_repeats>, the minimum possible value is chosen:
+		- If there is only 1 search, max_repeats is essentially infinite
+		- If there are only 2 searches, the minimum value is 0
+		- If there are only 3 searches, the minimum value is -1
+		- If there are only 4 searches, the minimum value is -2
+		- Etc...
+	-->
+	<max_repeats>0</max_repeats>
+	
+	<!--
+		The default list of searches.
+	-->
+	<default_list>example_list.xml</default_list>
+	
+	<!--
+		For the players that must pay coppers before using /addrand, specifies in what way they must pay for each track:
+		
+		0 (default) - Static (fixed price)
+		1 - Dynamic (price depends on length)
+	-->
+	<pay_type>0</pay_type>
+	
+	<!--
+		For the players that must pay coppers before using /addrand, specifies the price for each track:
+		
+		If pay_type is 0, the price is fixed. If pay_type is 1, it's price per minute (divided per seconds, rounding up).
+		
+		Default: 50
+	-->
+	<price>50</price>
+	
+	<!--
+		The minimum amount of coppers the server login must have to allow paying for songs.
+		
+		If the server has less coppers that the amount set below, players that must pay to play songs won't be able to play songs.
+		
+		Default: 1000
+	-->
+	<min_server_coppers>1000</min_server_coppers>
+	
+</settings>

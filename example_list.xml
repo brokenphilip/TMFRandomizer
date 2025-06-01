@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+	The following is a list of searches which Randomizer will use to search for tracks.
+	
+	Each <search> contains the following tags:
+	
+	1. <exchange> can be tmuf (for United Forever), tmnf (for Nations Forever), tmo (for Original), tms (for Sunrise) and tmn (for Nations ESWC)
+	2. <weight> is a positive number (X > 0) used in modes 1, 2 and 3 which dictates that this search is X times as likely to be picked
+	3. <params> contains a list of input parameters to be used for the search (ignoring "count"): https://api2.mania.exchange/Method/Index/43
+	
+	The following list of searches dictates:
+	- 60% chance to get a normal (Race) Stadium track from the Nations Forever exchange which has an author time below 2 minutes
+	- 20% chance to get a Platform Snow track from the Original exchange which has an author time below 1 minute and is in Platform mode
+	- 20% chance to get a normal (Race) Coast track which has an author time between 15 and 45 seconds
+	
+	Searches that are not properly formatted and/or do not return any results will be ignored from this list.
+-->
+<searches>
+	<search>
+		<exchange>tmnf</exchange>
+		<weight>3</weight>
+		<params>
+			<vehicle>7</vehicle>
+			<authortimemax>120000</authortimemax>
+			<primarytype>0</primarytype>
+		</params>
+	</search>
+	<search>
+		<exchange>tmo</exchange>
+		<weight>1</weight>
+		<params>
+			<vehicle>1</vehicle>
+			<authortimemax>60000</authortimemax>
+			<primarytype>2</primarytype>
+		</params>
+	</search>
+	<search>
+		<exchange>tms</exchange>
+		<weight>1</weight>
+		<params>
+			<vehicle>5</vehicle>
+			<authortimemin>15000</authortimemin>
+			<authortimemax>45000</authortimemax>
+			<primarytype>0</primarytype>
+		</params>
+	</search>
+</searches>
